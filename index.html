@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17365d">
+<title>Calculadora de Preços</title>
+<style>
+:root{--navy:#17365d;--blue:#2f75b5;--bg:#f3f6fa;--card:#fff;--text:#1d2939;--muted:#667085;--border:#d9e2ef;--green:#16794b;--yellow:#fff4cc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.45}
+header{background:linear-gradient(120deg,#17365d,#2f75b5);color:#fff;padding:25px 18px}
+.header-inner{max-width:1000px;margin:auto}
+h1{margin:0 0 6px;font-size:clamp(1.5rem,4vw,2rem)}
+header p{margin:0;color:#e8f1fb}
+main{max-width:1000px;margin:20px auto;padding:0 14px 36px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px #17365d0a}
+h2{font-size:1.12rem;margin:0 0 14px;color:var(--navy)}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field label{display:block;font-size:.9rem;font-weight:700;margin-bottom:6px}
+input{width:100%;font:inherit;border:1px solid #b9c7d8;border-radius:9px;padding:11px 12px;background:var(--yellow);color:var(--text)}
+input:focus{outline:3px solid #2f75b533;border-color:var(--blue)}
+.hint{font-size:.82rem;color:var(--muted);margin:5px 0 0}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--border);text-align:right}
+th{background:#eef3f9;color:var(--navy);font-size:.85rem}
+th:first-child,td:first-child{text-align:left}
+td input{min-width:90px;padding:8px}
+.result-row td{font-weight:700;background:#f0f6fc}
+.final{background:var(--navy);color:white;border-radius:12px;padding:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.final .label{font-size:.86rem;color:#d9e7f8}
+.final .value{font-size:clamp(1.45rem,4vw,2rem);font-weight:700;margin-top:4px;overflow-wrap:anywhere}
+.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.metric{border:1px solid var(--border);border-radius:10px;padding:13px}
+.metric .label{font-size:.82rem;color:var(--muted)}
+.metric .value{font-size:1.12rem;font-weight:700;margin-top:3px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+button{border:0;border-radius:9px;padding:11px 15px;font-weight:700;font-size:.95rem;cursor:pointer}
+.primary{background:var(--blue);color:#fff}
+.secondary{background:#e9eef5;color:var(--navy)}
+button:hover{filter:brightness(.96)}
+.note{font-size:.86rem;color:var(--muted)}
+.status{font-size:.85rem;color:var(--green);min-height:1.2em}
+@media(max-width:600px){.fields,.final,.metric-grid{grid-template-columns:1fr}.panel{padding:14px}header{padding:22px 16px}}
+@media print{body{background:#fff}.actions{display:none}.panel{box-shadow:none;break-inside:avoid}header{background:#17365d!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header><div class="header-inner">
+<h1>Calculadora de Preços</h1>
+<p>Simule negociações e veja quanto cada percentual representa em reais.</p>
+</div></header>
+<main>
+<section class="panel">
+<h2>1. Dados do produto</h2>
+<div class="fields">
+  <div class="field"><label for="product">Produto (opcional)</label><input id="product" type="text" placeholder="Ex.: Produto / SKU"></div>
+  <div class="field"><label for="up">Preço UP (R$)</label><input id="up" type="number" min="0" step="0.01" value="119.60"></div>
+</div>
+<p class="hint">Os campos amarelos são editáveis. Os resultados são atualizados automaticamente.</p>
+</section>
+
+<section class="panel">
+<h2>2. Percentuais das negociações</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Etapa / negociação</th><th>Percentual (%)</th><th>Valor da negociação (R$)</th></tr></thead>
+<tbody>
+<tr><td>DG Manual</td><td><input aria-label="Percentual DG Manual" id="dgManual" type="number" min="0" max="100" step="0.01" value="0"></td><td id="vDgManual">R$ 0,00</td></tr>
+<tr class="result-row"><td>Preço após DG Manual</td><td>—</td><td id="afterManual">R$ 119,60</td></tr>
+<tr><td>EC</td><td><input aria-label="Percentual EC" id="ec" type="number" min="0" max="100" step="0.01" value="6"></td><td id="vEc">R$ 7,18</td></tr>
+<tr class="result-row"><td>Preço após EC</td><td>—</td><td id="afterEc">R$ 112,42</td></tr>
+<tr><td>P&amp;G+</td><td><input aria-label="Percentual P&G+" id="pg" type="number" min="0" max="100" step="0.01" value="3"></td><td id="vPg">R$ 3,37</td></tr>
+<tr><td>DF 1</td><td><input aria-label="Percentual DF 1" id="df1" type="number" min="0" max="100" step="0.01" value="8.5"></td><td id="vDf1">R$ 9,56</td></tr>
+<tr><td>DF 2</td><td><input aria-label="Percentual DF 2" id="df2" type="number" min="0" max="100" step="0.01" value="8"></td><td id="vDf2">R$ 8,99</td></tr>
+<tr><td>DG 1</td><td><input aria-label="Percentual DG 1" id="dg1" type="number" min="0" max="100" step="0.01" value="0"></td><td id="vDg1">R$ 0,00</td></tr>
+<tr><td>DG 2</td><td><input aria-label="Percentual DG 2" id="dg2" type="number" min="0" max="100" step="0.01" value="15.2"></td><td id="vDg2">R$ 17,09</td></tr>
+</tbody>
+</table>
+</div>
+<p class="hint">Conforme a planilha original: DG Manual reduz o Preço UP; EC é aplicada sobre o preço após DG Manual; P&amp;G+, DF e DG são calculados individualmente sobre o preço após EC.</p>
+</section>
+
+<section class="panel">
+<h2>3. Resultado da simulação</h2>
+<div class="final">
+  <div><div class="label">PREÇO FINAL DO PRODUTO</div><div class="value" id="finalPrice">R$ 73,41</div></div>
+  <div><div class="label">DESCONTO TOTAL SOBRE PREÇO UP</div><div class="value" id="totalDiscount">R$ 46,19</div></div>
+</div>
+<div class="metric-grid">
+  <div class="metric"><div class="label">Desconto total sobre Preço UP</div><div class="value" id="totalPct">38,62%</div></div>
+  <div class="metric"><div class="label">Gasto pelo líquido</div><div class="value" id="netSpend">0,00%</div><p class="hint">(DG Manual + DG 1 + DG 2) ÷ preço final</p></div>
+  <div class="metric"><div class="label">Gasto pelo bruto</div><div class="value" id="grossSpend">0,00%</div><p class="hint">(DG Manual + DG 1 + DG 2) ÷ Preço UP</p></div>
+  <div class="metric"><div class="label">Soma dos percentuais informados</div><div class="value" id="sumPct">40,70%</div><p class="hint">A soma não é necessariamente igual ao desconto efetivo.</p></div>
+</div>
+<div class="actions">
+<button class="primary" id="copyBtn" type="button">Copiar resumo</button>
+<button class="secondary" id="resetBtn" type="button">Restaurar valores iniciais</button>
+<button class="secondary" id="printBtn" type="button">Imprimir / salvar PDF</button>
+</div>
+<p class="status" id="status" role="status" aria-live="polite"></p>
+</section>
+<section class="panel">
+<h2>Como os cálculos são feitos</h2>
+<p class="note"><strong>Preço após DG Manual:</strong> Preço UP − (Preço UP × DG Manual%).</p>
+<p class="note"><strong>Preço após EC:</strong> Preço após DG Manual − (Preço após DG Manual × EC%).</p>
+<p class="note"><strong>Valor de cada negociação posterior:</strong> Preço após EC × percentual correspondente.</p>
+<p class="note"><strong>Preço final:</strong> Preço após EC − soma dos valores de P&amp;G+, DF e DG.</p>
+<p class="note">Gasto pelo líquido e gasto pelo bruto seguem as fórmulas da planilha enviada. Os resultados são simulações comerciais e não incluem outros custos ou impostos.</p>
+</section>
+</main>
+<script>
+(() => {
+  const ids = ["product","up","dgManual","ec","pg","df1","df2","dg1","dg2"];
+  const initial = {product:"",up:"119.60",dgManual:"0",ec:"6",pg:"3",df1:"8.5",df2:"8",dg1:"0",dg2:"15.2"};
+  const el = id => document.getElementById(id);
+  const num = id => {
+    const raw = String(el(id).value ?? "").trim().replace(",", ".");
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : 0;
+  };
+  const pct = id => Math.min(100, Math.max(0, num(id))) / 100;
+  const brl = n => (Number.isFinite(n) ? n : 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+  const percent = n => (Number.isFinite(n) ? n : 0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}) + "%";
+  const set = (id, value) => { el(id).textContent = value; };
+
+  function calculate() {
+    const up = Math.max(0, num("up"));
+    const manualValue = up * pct("dgManual");
+    const afterManual = up - manualValue;
+    const ecValue = afterManual * pct("ec");
+    const afterEc = afterManual - ecValue;
+
+    const vals = {
+      pg: afterEc * pct("pg"),
+      df1: afterEc * pct("df1"),
+      df2: afterEc * pct("df2"),
+      dg1: afterEc * pct("dg1"),
+      dg2: afterEc * pct("dg2")
+    };
+    const final = afterEc - Object.values(vals).reduce((a,b)=>a+b,0);
+    const discount = up - final;
+    const dgCosts = manualValue + vals.dg1 + vals.dg2;
+    set("vDgManual", brl(manualValue));
+    set("afterManual", brl(afterManual));
+    set("vEc", brl(ecValue));
+    set("afterEc", brl(afterEc));
+    set("vPg", brl(vals.pg));
+    set("vDf1", brl(vals.df1));
+    set("vDf2", brl(vals.df2));
+    set("vDg1", brl(vals.dg1));
+    set("vDg2", brl(vals.dg2));
+    set("finalPrice", brl(final));
+    set("totalDiscount", brl(discount));
+    set("totalPct", percent(up ? discount/up*100 : 0));
+    set("netSpend", percent(final ? dgCosts/final*100 : 0));
+    set("grossSpend", percent(up ? dgCosts/up*100 : 0));
+    set("sumPct", percent(["dgManual","ec","pg","df1","df2","dg1","dg2"].reduce((s,id)=>s+num(id),0)));
+    return {up, manualValue, afterManual, ecValue, afterEc, vals, final, discount, dgCosts};
+  }
+
+  ids.forEach(id => el(id).addEventListener("input", calculate));
+  el("resetBtn").addEventListener("click", () => {
+    Object.entries(initial).forEach(([id,value]) => el(id).value = value);
+    calculate();
+    el("status").textContent = "Valores iniciais restaurados.";
+  });
+  el("printBtn").addEventListener("click", () => window.print());
+  el("copyBtn").addEventListener("click", async () => {
+    const r = calculate();
+    const name = el("product").value.trim() || "Não informado";
+    const summary = [
+      "CALCULADORA DE PREÇOS",
+      "Produto: " + name,
+      "Preço UP: " + brl(r.up),
+      "DG Manual (" + num("dgManual") + "%): " + brl(r.manualValue),
+      "Preço após DG Manual: " + brl(r.afterManual),
+      "EC (" + num("ec") + "%): " + brl(r.ecValue),
+      "Preço após EC: " + brl(r.afterEc),
+      "P&G+ (" + num("pg") + "%): " + brl(r.vals.pg),
+      "DF 1 (" + num("df1") + "%): " + brl(r.vals.df1),
+      "DF 2 (" + num("df2") + "%): " + brl(r.vals.df2),
+      "DG 1 (" + num("dg1") + "%): " + brl(r.vals.dg1),
+      "DG 2 (" + num("dg2") + "%): " + brl(r.vals.dg2),
+      "PREÇO FINAL: " + brl(r.final),
+      "Desconto total: " + brl(r.discount),
+      "Desconto sobre Preço UP: " + percent(r.up ? r.discount/r.up*100 : 0),
+      "Gasto pelo líquido: " + percent(r.final ? r.dgCosts/r.final*100 : 0),
+      "Gasto pelo bruto: " + percent(r.up ? r.dgCosts/r.up*100 : 0)
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(summary);
+      el("status").textContent = "Resumo copiado. Você já pode colar em uma mensagem ou documento.";
+    } catch(e) {
+      const ta = document.createElement("textarea");
+      ta.value = summary; document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand("copy"); ta.remove();
+      el("status").textContent = ok ? "Resumo copiado." : "Não foi possível copiar automaticamente. Use Imprimir / salvar PDF.";
+    }
+  });
+  calculate();
+})();
+</script>
+</body>
+</html>
